@@ -2,11 +2,9 @@ package encrypt
 
 import (
 	"enigma/types"
-	"strings"
-
-	// "strings"
 	"fmt"
-	"os"
+	"strings"
+	// "strings"
 )
 
 var Key = "abc"
@@ -36,31 +34,37 @@ func getRotorsConfig(initial types.RotorsConfig) func() types.RotorsConfig {
 	}
 }
 
+func alphaFallback(alpha rune) rune {
+	if alpha > 'Z' {
+		alpha -= 26
+	} else if alpha < 'A' {
+		alpha += 26
+	}
+	return alpha
+}
+
 func encryptChar(key types.RotorsConfig, char rune, wiring types.RotorsWiring) (codedChar string) {
-	charIndex := int(char - 'A' + 1)
+	var charIndex rune = char
 
-	charIndex = wiring.Rotor3[handleRotorAdvancement(charIndex, key.Rotors3)]
-	charIndex = wiring.Rotor2[handleRotorAdvancement(charIndex, key.Rotors2)]
-	charIndex = wiring.Rotor1[handleRotorAdvancement(charIndex, key.Rotors1)]
+	charIndex = wiring.Rotor3[alphaFallback(charIndex+rune(key.Rotors3))]
+	charIndex = wiring.Rotor2[alphaFallback(charIndex+rune(key.Rotors2))]
+	charIndex = wiring.Rotor1[alphaFallback(charIndex+rune(key.Rotors1))]
 	charIndex = wiring.Reflector[charIndex]
-	charIndex = wiring.Rotor1[handleRotorAdvancement(charIndex, key.Rotors1)]
-	charIndex = wiring.Rotor2[handleRotorAdvancement(charIndex, key.Rotors2)]
-	charIndex = wiring.Rotor3[handleRotorAdvancement(charIndex, key.Rotors3)]
 
-	// key.Rotors1
+	charIndex = wiring.Rotor1[alphaFallback(charIndex-rune(key.Rotors1))]
 
-	codedChar = string(rune(int('A') + int(charIndex) - 1))
+	charIndex = wiring.Rotor2[alphaFallback(charIndex-rune(key.Rotors2))]
+
+	charIndex = wiring.Rotor3[alphaFallback(charIndex-rune(key.Rotors3))]
+
+	codedChar = string(charIndex)
+
 	return
 }
 
 func Encrypt(key types.RotorsConfig, message string, wiring types.RotorsWiring) string {
 	message = strings.ToUpper(message)
-	for i, v := range wiring.Reflector {
-		if wiring.Reflector[v-1] != i+1 {
-			fmt.Println("Invalid Pairing", wiring.Reflector[v-1], v)
-			os.Exit(0)
-		}
-	}
+	fmt.Print("Encrypting: ", message, " : ")
 
 	var code string
 	incrementRotors := getRotorsConfig(key)
