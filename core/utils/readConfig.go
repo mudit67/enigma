@@ -7,12 +7,17 @@ import (
 	"os"
 )
 
-func LoadJson() (types.Factsheet, types.Key) {
-	// Loading Cofig file
-	var configFile, errF = os.Open("./assets/config.json")
+const (
+	configPath = "./assets/config.json"
+	keyPath    = "./assets/key.json"
+)
+
+func ParseConfigJson() (types.Factsheet, types.Key) {
+	// Loading Cofig Json
+	var configFile, errF = os.Open(configPath)
 
 	if errF != nil {
-		panic("Error in opening config file: " + errF.Error())
+		panic("Error in opening config Json: " + errF.Error())
 	}
 	defer configFile.Close()
 
@@ -21,13 +26,13 @@ func LoadJson() (types.Factsheet, types.Key) {
 	var fts types.Factsheet
 	err := json.Unmarshal(configBytes, &fts)
 	if err != nil {
-		panic("Unable to parse Json config" + err.Error())
+		panic("Unable to parse config Json" + err.Error())
 	}
 
-	// Loading Key file
-	var keyFile, errK = os.Open("./assets/key.json")
+	// Loading Key Json
+	var keyFile, errK = os.Open(keyPath)
 	if errK != nil {
-		panic("Error in opening file file: " + errK.Error())
+		panic("Error in opening Key json: " + errK.Error())
 	}
 
 	keyBytes, _ := io.ReadAll(keyFile)
@@ -37,7 +42,7 @@ func LoadJson() (types.Factsheet, types.Key) {
 	err = json.Unmarshal(keyBytes, &key)
 
 	if err != nil {
-		panic("Unable to parse Json key" + err.Error())
+		panic("Unable to parse key Json" + err.Error())
 	}
 
 	return fts, key

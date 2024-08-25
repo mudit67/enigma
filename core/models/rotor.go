@@ -56,7 +56,7 @@ func rotorFallback(cur rune) rune {
 	return cur
 }
 
-func (rot *Rotor) Jumble(inputChar rune, direction int) (outChar rune) {
+func (rot *Rotor) Pass(inputChar rune, direction int) (outChar rune) {
 	var inRotorWire rune
 	inRotorWire = (inputChar + (rot.CurrentPosition - 'A'))
 

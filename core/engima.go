@@ -11,16 +11,16 @@ const (
 )
 
 type Enigma struct {
-	RotorA         models.Rotor     `json:"RotorA"`
-	RotorB         models.Rotor     `json:"RotorB"`
-	RotorC         models.Rotor     `json:"RotorC"`
-	ReflectorRotor models.Reflector `json:"reflector"`
-	Plugboard      models.Reflector `json:"plugboard"`
+	RotorA         models.Rotor
+	RotorB         models.Rotor
+	RotorC         models.Rotor
+	ReflectorRotor models.Reflector
+	Plugboard      models.Reflector
 }
 
 func InitEnigma() Enigma {
 	var en Enigma
-	cfg, key := utils.LoadJson()
+	cfg, key := utils.ParseConfigJson()
 	var err error = nil
 
 	en.RotorA, err = models.InitRotor(cfg.RotorA, key.RotorA)
@@ -61,13 +61,13 @@ func (en *Enigma) Cipher(input string) (outStr string) {
 	for _, char := range input {
 		var out rune
 		out = en.Plugboard.Replace(rune(char))
-		out = en.RotorC.Jumble(out, RightToLeft)
-		out = en.RotorB.Jumble(out, RightToLeft)
-		out = en.RotorA.Jumble(out, RightToLeft)
+		out = en.RotorC.Pass(out, RightToLeft)
+		out = en.RotorB.Pass(out, RightToLeft)
+		out = en.RotorA.Pass(out, RightToLeft)
 		out = en.ReflectorRotor.WiringCfg[out]
-		out = en.RotorA.Jumble(out, LeftToRight)
-		out = en.RotorB.Jumble(out, LeftToRight)
-		out = en.RotorC.Jumble(out, LeftToRight)
+		out = en.RotorA.Pass(out, LeftToRight)
+		out = en.RotorB.Pass(out, LeftToRight)
+		out = en.RotorC.Pass(out, LeftToRight)
 		out = en.Plugboard.Replace(out)
 		en.incrementRotors()
 		outStr += string(out)
