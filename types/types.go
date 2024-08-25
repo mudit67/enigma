@@ -1,8 +1,15 @@
 package types
 
-type RotorsConfig struct {
-	Rotors1, Rotors2, Rotors3 int
+type Factsheet struct {
+	RotorA         map[string]string `json:"RotorA"`
+	RotorB         map[string]string `json:"RotorB"`
+	RotorC         map[string]string `json:"RotorC"`
+	ReflectorRotor map[string]string `json:"reflector"`
+	Plugboard      map[string]string `json:"plugboard"`
 }
-type RotorsWiring struct {
-	Rotor1, Rotor2, Rotor3, Reflector map[rune]rune
+
+type Key struct {
+	RotorA string `json:"RotorA"`
+	RotorB string `json:"RotorB"`
+	RotorC string `json:"RotorC"`
 }

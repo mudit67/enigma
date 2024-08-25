@@ -2,29 +2,43 @@ package utils
 
 import (
 	"encoding/json"
-	"enigma/core"
-	"fmt"
-	"io/ioutil"
+	"enigma/types"
+	"io"
 	"os"
 )
 
-func LoadJson(en *core.Enigma) {
-
-	var jsonFile, errF = os.Open("./../../assets/config.json")
+func LoadJson() (types.Factsheet, types.Key) {
+	// Loading Cofig file
+	var configFile, errF = os.Open("./assets/config.json")
 
 	if errF != nil {
-		fmt.Errorf(errF.Error())
-
+		panic("Error in opening config file: " + errF.Error())
 	}
-	defer jsonFile.Close()
+	defer configFile.Close()
 
-	byteFile, _ := ioutil.ReadAll(jsonFile)
+	configBytes, _ := io.ReadAll(configFile)
 
-	json.Unmarshal(byteFile, en)
-}
+	var fts types.Factsheet
+	err := json.Unmarshal(configBytes, &fts)
+	if err != nil {
+		panic("Unable to parse Json config" + err.Error())
+	}
 
-func InitEnigma() core.Enigma {
-	var en core.Enigma
-	LoadJson(&en)
-	return en
+	// Loading Key file
+	var keyFile, errK = os.Open("./assets/key.json")
+	if errK != nil {
+		panic("Error in opening file file: " + errK.Error())
+	}
+
+	keyBytes, _ := io.ReadAll(keyFile)
+
+	var key types.Key
+
+	err = json.Unmarshal(keyBytes, &key)
+
+	if err != nil {
+		panic("Unable to parse Json key" + err.Error())
+	}
+
+	return fts, key
 }

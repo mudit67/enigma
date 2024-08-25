@@ -1,14 +1,45 @@
 package models
 
+import (
+	"enigma/core/utils"
+	"errors"
+)
+
 type Rotor struct {
 	CurrentPosition rune /* (A..Z) */
 	wiringCfg       map[rune]rune
 }
 
+func InitRotor(cfg map[string]string, pos string) (Rotor, error) {
+	var rot Rotor
+	rot.wiringCfg = make(map[rune]rune)
+	var err error
+	rot.CurrentPosition, err = utils.StringToRune(pos)
+	if err != nil {
+		return Rotor{}, errors.New("Error in parsing Position of rotor: " + err.Error())
+	}
+	for key, value := range cfg {
+		kRune, kErr := utils.StringToRune(key)
+		if kErr != nil {
+			return Rotor{}, errors.New("Error in parsing entry points of rotor: " + kErr.Error())
+		}
+		vRune, vErr := utils.StringToRune(value)
+		if vErr != nil {
+			return Rotor{}, errors.New("Error in parsing exit points of rotor: " + vErr.Error())
+		}
+		rot.wiringCfg[kRune] = vRune
+	}
+	if len(rot.wiringCfg) != 26 {
+		return Rotor{}, errors.New("incorrect rotors config")
+	}
+
+	return rot, nil
+
+}
 func (rot *Rotor) Advance() bool {
 	rot.CurrentPosition++
-	if rot.CurrentPosition > 26 {
-		rot.CurrentPosition = 0
+	if rot.CurrentPosition > 'Z' {
+		rot.CurrentPosition = 'A'
 		return true
 	}
 
@@ -18,7 +49,6 @@ func (rot *Rotor) Advance() bool {
 func rotorFallback(cur rune) rune {
 	if cur > 'Z' {
 		return cur - 26
-
 	}
 	if cur < 'A' {
 		return cur + 26
@@ -26,12 +56,21 @@ func rotorFallback(cur rune) rune {
 	return cur
 }
 
-func (rot *Rotor) Jumple(inputChar rune, direction int) (outChar rune) {
+func (rot *Rotor) Jumble(inputChar rune, direction int) (outChar rune) {
 	var inRotorWire rune
-	if direction < 0 {
-		inRotorWire = rotorFallback(inputChar - rot.CurrentPosition)
+	inRotorWire = (inputChar + (rot.CurrentPosition - 'A'))
+
+	inRotorWire = rotorFallback(inRotorWire)
+	if direction == 1 {
+		outChar = rot.wiringCfg[inRotorWire]
 	} else {
-		inRotorWire = rotorFallback(inputChar + rot.CurrentPosition)
+		for k, v := range rot.wiringCfg {
+			if v == inRotorWire {
+				outChar = k
+				break
+			}
+		}
 	}
-	return rot.wiringCfg[inRotorWire]
+	outChar -= (rot.CurrentPosition - 'A')
+	return
 }
