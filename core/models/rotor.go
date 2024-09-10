@@ -48,9 +48,11 @@ func (rot *Rotor) Advance() bool {
 
 func rotorFallback(cur rune) rune {
 	if cur > 'Z' {
+		// return 'A' + (cur - 'Z')
 		return cur - 26
 	}
 	if cur < 'A' {
+		// return 'Z' - ('A' - cur)
 		return cur + 26
 	}
 	return cur
@@ -59,7 +61,6 @@ func rotorFallback(cur rune) rune {
 func (rot *Rotor) Pass(inputChar rune, direction int) (outChar rune) {
 	var inRotorWire rune
 	inRotorWire = (inputChar + (rot.CurrentPosition - 'A'))
-
 	inRotorWire = rotorFallback(inRotorWire)
 	if direction == 1 {
 		outChar = rot.wiringCfg[inRotorWire]
@@ -72,5 +73,6 @@ func (rot *Rotor) Pass(inputChar rune, direction int) (outChar rune) {
 		}
 	}
 	outChar -= (rot.CurrentPosition - 'A')
+	outChar = rotorFallback(outChar)
 	return
 }
