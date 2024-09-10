@@ -11,6 +11,7 @@ func MsgInput() string {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter text: ")
 	text, _ := reader.ReadString('\n')
+	text = strings.ToUpper(text)
 	fmt.Println(text)
 	var sb strings.Builder
 	for _, c := range text {
