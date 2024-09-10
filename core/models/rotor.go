@@ -7,12 +7,14 @@ import (
 
 type Rotor struct {
 	CurrentPosition rune /* (A..Z) */
-	wiringCfg       map[rune]rune
+	wiringCfgPos    map[rune]rune
+	wiringCfgNeg    map[rune]rune
 }
 
 func InitRotor(cfg map[string]string, pos string) (Rotor, error) {
 	var rot Rotor
-	rot.wiringCfg = make(map[rune]rune)
+	rot.wiringCfgPos = make(map[rune]rune)
+	rot.wiringCfgNeg = make(map[rune]rune)
 	var err error
 	rot.CurrentPosition, err = utils.StringToRune(pos)
 	if err != nil {
@@ -27,9 +29,10 @@ func InitRotor(cfg map[string]string, pos string) (Rotor, error) {
 		if vErr != nil {
 			return Rotor{}, errors.New("Error in parsing exit points of rotor: " + vErr.Error())
 		}
-		rot.wiringCfg[kRune] = vRune
+		rot.wiringCfgPos[kRune] = vRune
+		rot.wiringCfgNeg[vRune] = kRune
 	}
-	if len(rot.wiringCfg) != 26 {
+	if len(rot.wiringCfgPos) != 26 {
 		return Rotor{}, errors.New("incorrect rotors config")
 	}
 
@@ -63,14 +66,9 @@ func (rot *Rotor) Pass(inputChar rune, direction int) (outChar rune) {
 	inRotorWire = (inputChar + (rot.CurrentPosition - 'A'))
 	inRotorWire = rotorFallback(inRotorWire)
 	if direction == 1 {
-		outChar = rot.wiringCfg[inRotorWire]
+		outChar = rot.wiringCfgPos[inRotorWire]
 	} else {
-		for k, v := range rot.wiringCfg {
-			if v == inRotorWire {
-				outChar = k
-				break
-			}
-		}
+		outChar = rot.wiringCfgNeg[inRotorWire]
 	}
 	outChar -= (rot.CurrentPosition - 'A')
 	outChar = rotorFallback(outChar)
